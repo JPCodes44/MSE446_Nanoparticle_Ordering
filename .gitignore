@@ -1,0 +1,20 @@
+# Raw and processed image data
+data/raw/
+data/flat_with_kv_mm_filenames/
+data/flat_with_kv_mm_filenames_cropped/
+data/grouped_by_kv_mm/
+data/flat_with_kv_mm_filenames_cropped/flat_with_kv_mm_filenames_cropped/crop_metadata.csv
+*.tif
+*.tiff
+
+# Generated feature/data files that may be large
+data/features/
+*.npy
+*.pkl
+*.joblib
+
+# Python junk
+__pycache__/
+.venv/
+.env
+.ipynb_checkpoints/
