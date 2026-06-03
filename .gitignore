@@ -9,6 +9,11 @@ data/flat_with_kv_mm_filenames_cropped/flat_with_kv_mm_filenames_cropped/crop_me
 
 # Generated feature/data files that may be large
 data/features/
+data/features.csv
+data/dataset_metadata.csv
+results/*.csv
+results/figures/*.png
+results/figures/*.pdf
 *.npy
 *.pkl
 *.joblib
