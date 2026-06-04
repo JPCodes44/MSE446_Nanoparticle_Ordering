@@ -13,14 +13,17 @@ The first pass uses engineered image features only. Filename metadata is used fo
 ├── src/
 │   ├── config.py
 │   ├── parse_metadata.py
+│   ├── extract_basic_features.py
 │   ├── extract_features.py
 │   ├── train_dummy_baseline.py
+│   ├── train_logistic_regression.py
 │   └── evaluate.py
 ├── notebooks/
 │   ├── 00_template.ipynb
 │   ├── 01_dataset_audit.ipynb
 │   ├── 02_feature_extraction.ipynb
-│   └── 03_dummy_baseline.ipynb
+│   ├── 03_dummy_baseline.ipynb
+│   └── 04_logistic_regression_basic_features.ipynb
 ├── data/
 │   └── .gitkeep
 └── results/
@@ -65,6 +68,19 @@ This trains only the majority-class `DummyClassifier` baseline. Raw accuracy is 
 
 The dummy classifier ignores `X`, so the script uses a one-column placeholder feature matrix. Labels come from parsed filenames, and the train/test split uses `area_group = sample + "__" + area` to avoid repeated-area leakage.
 
+## Logistic Regression with basic image features
+
+Run:
+
+```bash
+python src/parse_metadata.py
+python src/train_dummy_baseline.py
+python src/extract_basic_features.py
+python src/train_logistic_regression.py
+```
+
+This is the first real supervised model. It uses only basic image-derived features from resized grayscale crops, then trains `LogisticRegression(class_weight="balanced", max_iter=2000)` with `StandardScaler`. Metadata is retained for labels, grouping, and auditing, but metadata columns are not used as predictors.
+
 ## Run The Workflow
 
 Start Jupyter:
@@ -77,6 +93,7 @@ Run notebooks in order:
 
 1. `notebooks/01_dataset_audit.ipynb`
 2. `notebooks/03_dummy_baseline.ipynb`
+3. `notebooks/04_logistic_regression_basic_features.ipynb`
 
 ## Outputs
 
@@ -84,14 +101,16 @@ Generated files are intentionally ignored:
 
 - `data/dataset_metadata.csv`
 - `data/features.csv`
+- `data/features_basic.csv`
 - `results/dataset_summary.csv`
 - `results/parameter_group_counts.csv`
 - `results/model_scores_dummy.csv`
+- `results/model_scores_logistic_basic.csv`
 - `results/figures/*.png`
 
 ## Modeling Notes
 
-This milestone trains only `DummyClassifier(strategy="most_frequent")`. Logistic regression, random forests, SVC, KNN, naive Bayes, CNNs, and hyperparameter tuning are intentionally out of scope until later project steps.
+The current modeling milestones are `DummyClassifier(strategy="most_frequent")` followed by Logistic Regression on basic image features. Random forests, SVC, KNN, naive Bayes, CNNs, HOG, graph features, augmentation, and hyperparameter tuning are intentionally out of scope until later project steps.
 
 The split uses `sample + area` groups so repeated crops or magnifications from the same area do not leak across train and test sets. Metadata columns such as `kv`, `mm`, `mag`, `sample`, and `area` are excluded from model features.
 

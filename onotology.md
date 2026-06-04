@@ -29,6 +29,29 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `save_scores` at line 64
   - Signature: `save_scores(scores: list[dict[str, float | str]], output_csv: str | Path) -> pd.DataFrame`
   - Purpose: Save model score dictionaries as a sorted CSV.
+### `src/extract_basic_features.py`
+
+- `load_metadata` at line 48
+  - Signature: `load_metadata(path: str | Path = METADATA_CSV) -> pd.DataFrame`
+  - Purpose: Load metadata needed for basic feature extraction.
+- `resolve_image_path` at line 65
+  - Signature: `resolve_image_path(row: pd.Series, image_dir: str | Path = IMAGE_DIR) -> Path`
+  - Purpose: Find the image path from metadata path, falling back to image_dir/filename.
+- `load_resized_grayscale` at line 80
+  - Signature: `load_resized_grayscale(path: str | Path, size: tuple[int, int] = RESIZE_SHAPE) -> np.ndarray`
+  - Purpose: Load an image as normalized grayscale after resizing to a fixed shape.
+- `extract_basic_image_features` at line 91
+  - Signature: `extract_basic_image_features(image: np.ndarray) -> dict[str, float]`
+  - Purpose: Compute basic intensity, entropy, bright-pixel, and edge features.
+- `extract_features_for_metadata` at line 111
+  - Signature: `extract_features_for_metadata(metadata: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Extract basic image features and retain tracking metadata columns.
+- `save_features` at line 126
+  - Signature: `save_features(features: pd.DataFrame, output_csv: str | Path = FEATURES_CSV) -> Path`
+  - Purpose: Save basic image features to CSV.
+- `main` at line 134
+  - Signature: `main() -> int`
+  - Purpose: Extract and save basic image-derived features.
 ### `src/extract_features.py`
 
 - `load_grayscale_image` at line 19
@@ -107,6 +130,41 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `main` at line 168
   - Signature: `main() -> int`
   - Purpose: Run the dummy baseline script.
+### `src/train_logistic_regression.py`
+
+- `load_features` at line 48
+  - Signature: `load_features(path: str | Path = FEATURES_CSV) -> pd.DataFrame`
+  - Purpose: Load basic feature table for logistic regression.
+- `label_proportions` at line 66
+  - Signature: `label_proportions(y: pd.Series) -> pd.Series`
+  - Purpose: Return label proportions indexed by known labels.
+- `split_distribution_distance` at line 71
+  - Signature: `split_distribution_distance(full_y: pd.Series, test_y: pd.Series) -> float`
+  - Purpose: Measure how close the test label distribution is to the full dataset.
+- `choose_group_split` at line 76
+  - Signature: `choose_group_split(features: pd.DataFrame, test_size: float = TEST_SIZE, seeds = SEED_RANGE) -> tuple[np.ndarray, np.ndarray, int, float]`
+  - Purpose: Choose a group-aware split with test labels closest to full labels.
+- `make_model` at line 113
+  - Signature: `make_model()`
+  - Purpose: Create the scaled Logistic Regression pipeline.
+- `evaluate_predictions` at line 121
+  - Signature: `evaluate_predictions(y_train: pd.Series, y_test: pd.Series, y_train_pred: np.ndarray, y_test_pred: np.ndarray, selected_seed: int, split_distance: float) -> tuple[pd.DataFrame, str, np.ndarray]`
+  - Purpose: Compute aggregate, per-class, and confusion-matrix metrics.
+- `save_confusion_matrix_figure` at line 164
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred: np.ndarray, output_path: str | Path = CONFUSION_MATRIX_FIGURE) -> Path`
+  - Purpose: Save a confusion matrix figure for logistic regression.
+- `train_logistic_regression` at line 189
+  - Signature: `train_logistic_regression(features: pd.DataFrame) -> tuple[pd.DataFrame, str, np.ndarray, Path, pd.Series, pd.Series]`
+  - Purpose: Train and evaluate Logistic Regression on basic image features.
+- `load_dummy_scores` at line 219
+  - Signature: `load_dummy_scores(path: str | Path = DUMMY_SCORES_CSV) -> pd.DataFrame | None`
+  - Purpose: Load dummy baseline scores when available.
+- `print_dummy_comparison` at line 227
+  - Signature: `print_dummy_comparison(logistic_scores: pd.DataFrame) -> None`
+  - Purpose: Print dummy-vs-logistic headline metrics.
+- `main` at line 254
+  - Signature: `main() -> int`
+  - Purpose: Run Logistic Regression training on basic image features.
 ### `src/train_models.py`
 
 - `feature_columns` at line 34
