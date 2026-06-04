@@ -75,6 +75,38 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `load_or_build_features` at line 110
   - Signature: `load_or_build_features(metadata: pd.DataFrame, output_csv: str | Path, force_rebuild: bool = False, sample_n: int | None = None) -> pd.DataFrame`
   - Purpose: Load cached features or compute and save them.
+### `src/extract_hog_features.py`
+
+- `hog_feature_names` at line 41
+  - Signature: `hog_feature_names(n_features: int) -> list[str]`
+  - Purpose: Return stable zero-padded HOG feature column names.
+- `extract_hog_from_image` at line 46
+  - Signature: `extract_hog_from_image(image: np.ndarray) -> np.ndarray`
+  - Purpose: Compute one HOG descriptor vector from a normalized grayscale image.
+- `extract_hog_features_for_metadata` at line 59
+  - Signature: `extract_hog_features_for_metadata(metadata: pd.DataFrame, sample_n: int | None = SAMPLE_N) -> pd.DataFrame`
+  - Purpose: Extract HOG features for metadata rows while retaining tracking columns.
+- `load_or_build_hog_features` at line 90
+  - Signature: `load_or_build_hog_features(metadata: pd.DataFrame, output_csv: str | Path = HOG_FEATURES_CSV, force_rebuild: bool = FORCE_REBUILD, sample_n: int | None = SAMPLE_N) -> pd.DataFrame`
+  - Purpose: Load cached HOG features or extract and save them.
+- `hog_feature_columns` at line 110
+  - Signature: `hog_feature_columns(features: pd.DataFrame) -> list[str]`
+  - Purpose: Return HOG feature columns from a feature table.
+- `load_basic_features` at line 118
+  - Signature: `load_basic_features(path: str | Path = BASIC_FEATURES_CSV) -> pd.DataFrame`
+  - Purpose: Load the existing basic feature table.
+- `validate_feature_alignment` at line 134
+  - Signature: `validate_feature_alignment(basic: pd.DataFrame, hog_features: pd.DataFrame) -> None`
+  - Purpose: Validate that basic and HOG tables describe the same labeled images.
+- `combine_basic_and_hog_features` at line 160
+  - Signature: `combine_basic_and_hog_features(basic: pd.DataFrame, hog_features: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Combine basic image features with HOG descriptors without duplicating metadata.
+- `save_combined_features` at line 176
+  - Signature: `save_combined_features(features: pd.DataFrame, output_csv: str | Path = COMBINED_FEATURES_CSV) -> Path`
+  - Purpose: Save combined basic + HOG features to CSV.
+- `main` at line 187
+  - Signature: `main() -> int`
+  - Purpose: Extract HOG features, combine with basic features, and save both tables.
 ### `src/parse_metadata.py`
 
 - `parse_numeric_token` at line 18
@@ -372,3 +404,50 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `main` at line 397
   - Signature: `main() -> int`
   - Purpose: Run basic and tuned SVC training on basic image features.
+### `src/train_svc_hog.py`
+
+- `load_combined_features` at line 73
+  - Signature: `load_combined_features(path: str | Path = COMBINED_FEATURES_CSV) -> pd.DataFrame`
+  - Purpose: Load combined basic + HOG features for SVC training.
+- `feature_columns` at line 92
+  - Signature: `feature_columns(features: pd.DataFrame) -> list[str]`
+  - Purpose: Return basic image feature columns plus HOG descriptor columns.
+- `make_model` at line 97
+  - Signature: `make_model()`
+  - Purpose: Create the scaled SVC pipeline for basic + HOG features.
+- `score_set` at line 102
+  - Signature: `score_set(y_true: pd.Series, y_pred: np.ndarray) -> dict[str, float]`
+  - Purpose: Compute core metrics for one split.
+- `svc_params` at line 115
+  - Signature: `svc_params(model) -> dict[str, object]`
+  - Purpose: Return SVC hyperparameters from a fitted pipeline.
+- `evaluate_predictions` at line 126
+  - Signature: `evaluate_predictions(y_train: pd.Series, y_test: pd.Series, y_train_pred: np.ndarray, y_test_pred: np.ndarray, selected_seed: int, split_distance: float, model, best_cv_macro_f1: float, best_params: dict[str, object], n_features: int, n_hog_features: int) -> tuple[pd.DataFrame, str, pd.DataFrame]`
+  - Purpose: Compute train/test metrics, per-class report, and confusion matrix.
+- `save_confusion_matrix_figure` at line 195
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred: np.ndarray, output_path: str | Path = CONFUSION_MATRIX_FIGURE) -> Path`
+  - Purpose: Save a confusion matrix figure for tuned SVC with basic + HOG features.
+- `cross_validation_folds` at line 220
+  - Signature: `cross_validation_folds(groups: pd.Series, requested_folds: int = CV_FOLDS) -> int`
+  - Purpose: Return a valid number of group-aware CV folds for the training groups.
+- `tune_svc_hog` at line 228
+  - Signature: `tune_svc_hog(X_train: pd.DataFrame, y_train: pd.Series, groups: pd.Series, use_small_grid: bool = USE_SMALL_GRID) -> GridSearchCV`
+  - Purpose: Tune a scaled SVC on the training split only.
+- `save_best_params` at line 248
+  - Signature: `save_best_params(search: GridSearchCV, output_path: str | Path = BEST_PARAMS_JSON) -> Path`
+  - Purpose: Save best parameters and CV score as JSON.
+- `train_svc_hog` at line 260
+  - Signature: `train_svc_hog(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, Path, pd.Series, pd.Series, GridSearchCV]`
+  - Purpose: Train and evaluate tuned SVC on combined basic + HOG features.
+- `comparison_row` at line 305
+  - Signature: `comparison_row(label: str, path: Path) -> dict[str, object] | None`
+  - Purpose: Load one comparison row from a score CSV if available.
+- `build_comparison_table` at line 325
+  - Signature: `build_comparison_table(svc_hog_scores: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Build a comparison table against prior model score CSVs.
+- `print_previous_svc_comparison` at line 345
+  - Signature: `print_previous_svc_comparison(scores: pd.DataFrame) -> None`
+  - Purpose: Print headline comparison against the prior tuned SVC if available.
+- `main` at line 363
+  - Signature: `main() -> int`
+  - Purpose: Run tuned SVC training on combined basic + HOG features.

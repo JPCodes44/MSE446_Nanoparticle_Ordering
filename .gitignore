@@ -12,8 +12,11 @@ data/flat_with_kv_mm_filenames_cropped/flat_with_kv_mm_filenames_cropped/crop_me
 data/features/
 data/features.csv
 data/features_basic.csv
+data/features_hog.csv
+data/features_basic_hog.csv
 data/dataset_metadata.csv
 results/*.csv
+results/*.json
 results/figures/*.png
 results/figures/*.pdf
 *.npy
