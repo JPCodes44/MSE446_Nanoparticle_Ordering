@@ -185,6 +185,50 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `main` at line 221
   - Signature: `main() -> int`
   - Purpose: Run Gaussian Naive Bayes training on basic image features.
+### `src/train_knn.py`
+
+- `make_basic_model` at line 60
+  - Signature: `make_basic_model()`
+  - Purpose: Create the scaled basic KNN pipeline.
+- `score_set` at line 68
+  - Signature: `score_set(y_true: pd.Series, y_pred: np.ndarray) -> dict[str, float]`
+  - Purpose: Compute core metrics for one split.
+- `knn_params` at line 81
+  - Signature: `knn_params(model) -> dict[str, object]`
+  - Purpose: Return the KNN hyperparameters from a fitted pipeline.
+- `evaluate_predictions` at line 91
+  - Signature: `evaluate_predictions(model_name: str, y_train: pd.Series, y_test: pd.Series, y_train_pred: np.ndarray, y_test_pred: np.ndarray, selected_seed: int, split_distance: float, model, best_cv_macro_f1: float | None = None, best_params: dict[str, object] | None = None) -> tuple[pd.DataFrame, str, pd.DataFrame]`
+  - Purpose: Compute train/test metrics, per-class report, and confusion matrix.
+- `save_confusion_matrix_figure` at line 156
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred: np.ndarray, output_path: str | Path, title: str) -> Path`
+  - Purpose: Save a confusion matrix figure for one KNN experiment.
+- `cross_validation_folds` at line 182
+  - Signature: `cross_validation_folds(groups: pd.Series, requested_folds: int = CV_FOLDS) -> int`
+  - Purpose: Return a valid number of group-aware CV folds for the training groups.
+- `tune_knn` at line 190
+  - Signature: `tune_knn(X_train: pd.DataFrame, y_train: pd.Series, groups: pd.Series) -> GridSearchCV`
+  - Purpose: Tune a scaled KNN pipeline with GroupKFold on the training split only.
+- `evaluate_model` at line 204
+  - Signature: `evaluate_model(model, model_name: str, X_train: pd.DataFrame, X_test: pd.DataFrame, y_train: pd.Series, y_test: pd.Series, selected_seed: int, split_distance: float, figure_path: str | Path, figure_title: str, best_cv_macro_f1: float | None = None, best_params: dict[str, object] | None = None) -> tuple[pd.DataFrame, str, pd.DataFrame, Path]`
+  - Purpose: Fit a KNN pipeline and evaluate it on train and held-out test rows.
+- `train_knn` at line 241
+  - Signature: `train_knn(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, pd.DataFrame, str, pd.DataFrame, Path, pd.Series, pd.Series, GridSearchCV]`
+  - Purpose: Train and evaluate basic and tuned KNN experiments.
+- `comparison_row` at line 316
+  - Signature: `comparison_row(label: str, path: Path) -> dict[str, object] | None`
+  - Purpose: Load one comparison row from a score CSV if available.
+- `build_comparison_table` at line 336
+  - Signature: `build_comparison_table(basic_scores: pd.DataFrame, tuned_scores: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Build a comparison table against prior model score CSVs.
+- `print_overfitting_summary` at line 360
+  - Signature: `print_overfitting_summary(scores: pd.DataFrame, label: str) -> None`
+  - Purpose: Print train-vs-test metrics for quick overfitting inspection.
+- `print_model_outputs` at line 372
+  - Signature: `print_model_outputs(scores: pd.DataFrame, report: str, matrix: pd.DataFrame, label: str) -> None`
+  - Purpose: Print metrics, per-class report, and confusion matrix.
+- `main` at line 387
+  - Signature: `main() -> int`
+  - Purpose: Run basic and tuned KNN training on basic image features.
 ### `src/train_logistic_regression.py`
 
 - `load_features` at line 48

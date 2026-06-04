@@ -20,6 +20,7 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── train_decision_tree.py
 │   ├── train_random_forest.py
 │   ├── train_gaussian_nb.py
+│   ├── train_knn.py
 │   └── evaluate.py
 ├── notebooks/
 │   ├── 00_template.ipynb
@@ -29,7 +30,8 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── 04_logistic_regression_basic_features.ipynb
 │   ├── 05_decision_tree_basic_features.ipynb
 │   ├── 06_random_forest_basic_features.ipynb
-│   └── 07_gaussian_nb_basic_features.ipynb
+│   ├── 07_gaussian_nb_basic_features.ipynb
+│   └── 08_knn_basic_features.ipynb
 ├── data/
 │   └── .gitkeep
 └── results/
@@ -86,6 +88,7 @@ python src/train_logistic_regression.py
 python src/train_decision_tree.py
 python src/train_random_forest.py
 python src/train_gaussian_nb.py
+python src/train_knn.py
 ```
 
 This is the first real supervised model. It uses only basic image-derived features from resized grayscale crops, then trains `LogisticRegression(class_weight="balanced", max_iter=2000)` with `StandardScaler`. Metadata is retained for labels, grouping, and auditing, but metadata columns are not used as predictors.
@@ -95,6 +98,8 @@ This is the first real supervised model. It uses only basic image-derived featur
 `train_random_forest.py` trains `RandomForestClassifier(n_estimators=200, class_weight="balanced", random_state=42)` on the same basic feature table and grouped split logic. It then tunes only the Random Forest model family with `GridSearchCV` and `GroupKFold` on the training split, using macro F1 as the score. It also saves impurity-based feature importance outputs for both the basic and tuned forests.
 
 `train_gaussian_nb.py` trains `GaussianNB` on the same basic image feature columns and grouped split. Gaussian Naive Bayes is a probability-based baseline that assumes numeric features are conditionally independent and approximately normally distributed within each class, which is probably weak for image features. It is included as a simple course-aligned comparison model.
+
+`train_knn.py` trains a scaled `KNeighborsClassifier` baseline and then tunes only KNN with grouped cross-validation on the training split. KNN is a similarity-based model that predicts from nearby examples in scaled feature space, so `StandardScaler` is required before distance calculations.
 
 ## Run The Workflow
 
@@ -112,6 +117,7 @@ Run notebooks in order:
 4. `notebooks/05_decision_tree_basic_features.ipynb`
 5. `notebooks/06_random_forest_basic_features.ipynb`
 6. `notebooks/07_gaussian_nb_basic_features.ipynb`
+7. `notebooks/08_knn_basic_features.ipynb`
 
 ## Outputs
 
@@ -129,13 +135,15 @@ Generated files are intentionally ignored:
 - `results/model_scores_random_forest_basic.csv`
 - `results/model_scores_random_forest_tuned.csv`
 - `results/model_scores_gaussian_nb_basic.csv`
+- `results/model_scores_knn_basic.csv`
+- `results/model_scores_knn_tuned.csv`
 - `results/feature_importance_random_forest_basic.csv`
 - `results/feature_importance_random_forest_tuned.csv`
 - `results/figures/*.png`
 
 ## Modeling Notes
 
-The current modeling milestones are `DummyClassifier(strategy="most_frequent")`, Logistic Regression on basic image features, Decision Tree on the same basic features, Random Forest on the same basic features, and Gaussian Naive Bayes on the same basic features. The Decision Tree and Random Forest experiments include simple grouped hyperparameter tuning. SVC, KNN, CNNs, HOG, graph features, and augmentation are intentionally out of scope until later project steps.
+The current modeling milestones are `DummyClassifier(strategy="most_frequent")`, Logistic Regression on basic image features, Decision Tree on the same basic features, Random Forest on the same basic features, Gaussian Naive Bayes on the same basic features, and KNN on the same basic features. The Decision Tree, Random Forest, and KNN experiments include simple grouped hyperparameter tuning. SVC, CNNs, HOG, graph features, and augmentation are intentionally out of scope until later project steps.
 
 The split uses `sample + area` groups so repeated crops or magnifications from the same area do not leak across train and test sets. Metadata columns such as `kv`, `mm`, `mag`, `sample`, and `area` are excluded from model features.
 
