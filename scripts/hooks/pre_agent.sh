@@ -2,10 +2,10 @@
 set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-ontology_file="$repo_root/onotology.md"
+ontology_file="$repo_root/ontology.md"
 
 if [[ ! -f "$ontology_file" ]]; then
-  echo "No onotology.md file found at $ontology_file"
+  echo "No ontology.md file found at $ontology_file"
   exit 0
 fi
 

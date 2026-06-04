@@ -36,4 +36,4 @@ Large data and generated artifacts are intentionally ignored by `.gitignore`: `.
 
 ## Agent Hook Instructions
 
-Before code work, run `scripts/hooks/pre_agent.sh` and review `onotology.md` for reusable functions. After adding or changing Python functions, run `python scripts/hooks/post_agent.py` so the function index is refreshed for the next agent run.
+Before code work, run `scripts/hooks/pre_agent.sh` and review `ontology.md` for reusable functions. After adding or changing Python functions, run `python scripts/hooks/post_agent.py` so the function index is refreshed for the next agent run.

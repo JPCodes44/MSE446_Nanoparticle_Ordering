@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-ONTOLOGY = "onotology.md"
+ONTOLOGY = "ontology.md"
 SKIP_DIRS = {
     ".git",
     ".venv",
