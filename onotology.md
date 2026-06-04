@@ -107,6 +107,35 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `main` at line 158
   - Signature: `main() -> int`
   - Purpose: Parse local TIFF filenames, save metadata, and print audit counts.
+### `src/train_decision_tree.py`
+
+- `make_model` at line 55
+  - Signature: `make_model() -> DecisionTreeClassifier`
+  - Purpose: Create the decision tree baseline model.
+- `score_set` at line 60
+  - Signature: `score_set(y_true: pd.Series, y_pred) -> dict[str, float]`
+  - Purpose: Compute core metrics for one split.
+- `evaluate_predictions` at line 73
+  - Signature: `evaluate_predictions(model_name: str, y_train: pd.Series, y_test: pd.Series, y_train_pred, y_test_pred, selected_seed: int, split_distance: float, best_cv_macro_f1: float | None = None, best_params: dict[str, object] | None = None) -> tuple[pd.DataFrame, str, pd.DataFrame]`
+  - Purpose: Compute train/test metrics, per-class report, and confusion matrix.
+- `save_confusion_matrix_figure` at line 133
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred, output_path: str | Path = CONFUSION_MATRIX_FIGURE, title: str = 'Decision tree basic') -> Path`
+  - Purpose: Save a confusion matrix figure for the decision tree baseline.
+- `tune_decision_tree` at line 159
+  - Signature: `tune_decision_tree(X_train: pd.DataFrame, y_train: pd.Series, groups: pd.Series) -> GridSearchCV`
+  - Purpose: Tune tree hyperparameters with group-aware cross-validation.
+- `evaluate_model` at line 173
+  - Signature: `evaluate_model(model: DecisionTreeClassifier, model_name: str, X_train: pd.DataFrame, X_test: pd.DataFrame, y_train: pd.Series, y_test: pd.Series, selected_seed: int, split_distance: float, figure_path: str | Path, figure_title: str, best_cv_macro_f1: float | None = None, best_params: dict[str, object] | None = None) -> tuple[pd.DataFrame, str, pd.DataFrame, Path]`
+  - Purpose: Fit a tree model and evaluate it on train and held-out test rows.
+- `train_decision_tree` at line 209
+  - Signature: `train_decision_tree(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, pd.DataFrame, str, pd.DataFrame, Path, pd.Series, pd.Series, GridSearchCV]`
+  - Purpose: Train untuned and tuned DecisionTreeClassifier baselines.
+- `print_overfitting_summary` at line 280
+  - Signature: `print_overfitting_summary(scores: pd.DataFrame, label: str) -> None`
+  - Purpose: Print train-vs-test metrics for quick overfitting inspection.
+- `main` at line 292
+  - Signature: `main() -> int`
+  - Purpose: Run DecisionTreeClassifier training on basic image features.
 ### `src/train_dummy_baseline.py`
 
 - `load_metadata` at line 40
