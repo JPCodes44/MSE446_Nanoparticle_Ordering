@@ -6,7 +6,6 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 DATA_DIR = PROJECT_ROOT / "data"
-LEGACY_IMAGE_DIR = PROJECT_ROOT / "flat_with_kv_mm_filenames_cropped"
 IMAGE_DIR = DATA_DIR / "flat_with_kv_mm_filenames_cropped"
 
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -25,11 +24,7 @@ FORCE_REBUILD = False
 
 
 def get_image_dir() -> Path:
-    """Return the image directory without moving or copying local TIFF files."""
-    if IMAGE_DIR.exists():
-        return IMAGE_DIR
-    if LEGACY_IMAGE_DIR.exists():
-        return LEGACY_IMAGE_DIR
+    """Return the required local image directory."""
     return IMAGE_DIR
 
 

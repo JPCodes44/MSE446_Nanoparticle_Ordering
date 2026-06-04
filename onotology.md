@@ -12,10 +12,10 @@ This file is the agent-facing index of reusable code in this repository. The pre
 
 ### `src/config.py`
 
-- `get_image_dir` at line 27
+- `get_image_dir` at line 26
   - Signature: `get_image_dir() -> Path`
-  - Purpose: Return the image directory without moving or copying local TIFF files.
-- `ensure_output_dirs` at line 36
+  - Purpose: Return the required local image directory.
+- `ensure_output_dirs` at line 31
   - Signature: `ensure_output_dirs() -> None`
   - Purpose: Create directories used for generated tables and figures.
 ### `src/evaluate.py`
@@ -54,27 +54,59 @@ This file is the agent-facing index of reusable code in this repository. The pre
   - Purpose: Load cached features or compute and save them.
 ### `src/parse_metadata.py`
 
-- `parse_numeric_token` at line 13
+- `parse_numeric_token` at line 18
   - Signature: `parse_numeric_token(value: str, suffix: str) -> float | None`
   - Purpose: Parse tokens such as '10p0kV' or '6p4mm' into floats.
-- `parse_filename` at line 20
+- `parse_filename` at line 25
   - Signature: `parse_filename(path: str | Path) -> dict[str, object]`
   - Purpose: Parse a metadata-rich crop filename into structured fields.
-- `list_image_files` at line 50
+- `list_image_files` at line 67
   - Signature: `list_image_files(image_dir: str | Path) -> list[Path]`
   - Purpose: List TIFF image files in a directory without recursing.
-- `build_metadata_table` at line 60
+- `build_metadata_table` at line 82
   - Signature: `build_metadata_table(image_dir: str | Path) -> pd.DataFrame`
   - Purpose: Parse all image filenames in image_dir into a metadata table.
-- `summarize_dataset` at line 83
+- `summarize_dataset` at line 112
   - Signature: `summarize_dataset(metadata: pd.DataFrame) -> pd.DataFrame`
   - Purpose: Return compact dataset-level counts for audit output.
-- `counts_by_magnification_and_label` at line 91
+- `counts_by_magnification_and_label` at line 120
   - Signature: `counts_by_magnification_and_label(metadata: pd.DataFrame) -> pd.DataFrame`
   - Purpose: Count images by magnification and label.
-- `counts_by_parameter_group_and_label` at line 101
+- `counts_by_parameter_group_and_label` at line 130
   - Signature: `counts_by_parameter_group_and_label(metadata: pd.DataFrame) -> pd.DataFrame`
   - Purpose: Count images by kv/mm/magnification parameter group and label.
+- `save_metadata` at line 140
+  - Signature: `save_metadata(metadata: pd.DataFrame, output_csv: str | Path = METADATA_CSV) -> Path`
+  - Purpose: Save parsed metadata to CSV.
+- `print_dataset_audit` at line 148
+  - Signature: `print_dataset_audit(metadata: pd.DataFrame) -> None`
+  - Purpose: Print the required dataset audit summary.
+- `main` at line 158
+  - Signature: `main() -> int`
+  - Purpose: Parse local TIFF filenames, save metadata, and print audit counts.
+### `src/train_dummy_baseline.py`
+
+- `load_metadata` at line 40
+  - Signature: `load_metadata(path: str | Path = METADATA_CSV) -> pd.DataFrame`
+  - Purpose: Load parsed metadata for dummy baseline training.
+- `make_placeholder_features` at line 57
+  - Signature: `make_placeholder_features(n_samples: int) -> np.ndarray`
+  - Purpose: Create placeholder features because DummyClassifier ignores X.
+- `split_group_aware` at line 62
+  - Signature: `split_group_aware(metadata: pd.DataFrame, test_size: float = TEST_SIZE, random_state: int = RANDOM_STATE) -> tuple[np.ndarray, np.ndarray]`
+  - Purpose: Split rows while keeping sample-area groups out of both train and test.
+- `evaluate_dummy_baseline` at line 85
+  - Signature: `evaluate_dummy_baseline(y_train: pd.Series, y_test: pd.Series, y_train_pred: np.ndarray, y_test_pred: np.ndarray) -> tuple[pd.DataFrame, str, np.ndarray]`
+  - Purpose: Compute aggregate, per-class, and confusion-matrix metrics.
+- `save_confusion_matrix_figure` at line 117
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred: np.ndarray, output_path: str | Path = CONFUSION_MATRIX_FIGURE) -> Path`
+  - Purpose: Save a confusion matrix figure for the dummy baseline.
+- `train_dummy_baseline` at line 142
+  - Signature: `train_dummy_baseline(metadata: pd.DataFrame) -> tuple[pd.DataFrame, str, np.ndarray, Path]`
+  - Purpose: Train and evaluate the majority-class dummy baseline.
+- `main` at line 168
+  - Signature: `main() -> int`
+  - Purpose: Run the dummy baseline script.
 ### `src/train_models.py`
 
 - `feature_columns` at line 34

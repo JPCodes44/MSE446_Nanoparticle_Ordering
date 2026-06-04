@@ -14,13 +14,13 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── config.py
 │   ├── parse_metadata.py
 │   ├── extract_features.py
-│   ├── train_models.py
+│   ├── train_dummy_baseline.py
 │   └── evaluate.py
 ├── notebooks/
 │   ├── 00_template.ipynb
 │   ├── 01_dataset_audit.ipynb
 │   ├── 02_feature_extraction.ipynb
-│   └── 03_modeling_baselines.ipynb
+│   └── 03_dummy_baseline.ipynb
 ├── data/
 │   └── .gitkeep
 └── results/
@@ -34,12 +34,6 @@ Place the cropped TIFF images locally at:
 
 ```text
 data/flat_with_kv_mm_filenames_cropped/
-```
-
-The code also falls back to the legacy local folder:
-
-```text
-flat_with_kv_mm_filenames_cropped/
 ```
 
 Do not commit raw or cropped `.tif` / `.tiff` files. They are ignored by Git.
@@ -58,6 +52,19 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Dummy baseline
+
+Run:
+
+```bash
+python src/parse_metadata.py
+python src/train_dummy_baseline.py
+```
+
+This trains only the majority-class `DummyClassifier` baseline. Raw accuracy is expected to be misleading because the dataset is imbalanced, so use balanced accuracy and macro F1 when deciding whether future image-derived models improve on this baseline.
+
+The dummy classifier ignores `X`, so the script uses a one-column placeholder feature matrix. Labels come from parsed filenames, and the train/test split uses `area_group = sample + "__" + area` to avoid repeated-area leakage.
+
 ## Run The Workflow
 
 Start Jupyter:
@@ -69,22 +76,7 @@ jupyter notebook
 Run notebooks in order:
 
 1. `notebooks/01_dataset_audit.ipynb`
-2. `notebooks/02_feature_extraction.ipynb`
-3. `notebooks/03_modeling_baselines.ipynb`
-
-For a quick feature smoke test, keep this setting in `02_feature_extraction.ipynb`:
-
-```python
-SAMPLE_N = 50
-FORCE_REBUILD = False
-```
-
-When ready to build the full feature table:
-
-```python
-SAMPLE_N = None
-FORCE_REBUILD = True
-```
+2. `notebooks/03_dummy_baseline.ipynb`
 
 ## Outputs
 
@@ -94,19 +86,12 @@ Generated files are intentionally ignored:
 - `data/features.csv`
 - `results/dataset_summary.csv`
 - `results/parameter_group_counts.csv`
-- `results/model_scores.csv`
+- `results/model_scores_dummy.csv`
 - `results/figures/*.png`
 
 ## Modeling Notes
 
-The baseline notebook trains:
-
-- `DummyClassifier`
-- `LogisticRegression`
-- `DecisionTreeClassifier`
-- `RandomForestClassifier`
-- `KNeighborsClassifier`
-- `SVC`
+This milestone trains only `DummyClassifier(strategy="most_frequent")`. Logistic regression, random forests, SVC, KNN, naive Bayes, CNNs, and hyperparameter tuning are intentionally out of scope until later project steps.
 
 The split uses `sample + area` groups so repeated crops or magnifications from the same area do not leak across train and test sets. Metadata columns such as `kv`, `mm`, `mag`, `sample`, and `area` are excluded from model features.
 
