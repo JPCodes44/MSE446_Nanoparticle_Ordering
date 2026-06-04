@@ -159,6 +159,32 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `main` at line 168
   - Signature: `main() -> int`
   - Purpose: Run the dummy baseline script.
+### `src/train_gaussian_nb.py`
+
+- `make_model` at line 47
+  - Signature: `make_model() -> GaussianNB`
+  - Purpose: Create the Gaussian Naive Bayes baseline model.
+- `score_set` at line 52
+  - Signature: `score_set(y_true: pd.Series, y_pred) -> dict[str, float]`
+  - Purpose: Compute core metrics for one split.
+- `evaluate_predictions` at line 65
+  - Signature: `evaluate_predictions(y_train: pd.Series, y_test: pd.Series, y_train_pred, y_test_pred, selected_seed: int, split_distance: float) -> tuple[pd.DataFrame, str, pd.DataFrame]`
+  - Purpose: Compute train/test metrics, per-class report, and confusion matrix.
+- `save_confusion_matrix_figure` at line 120
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred, output_path: str | Path = CONFUSION_MATRIX_FIGURE) -> Path`
+  - Purpose: Save a confusion matrix figure for Gaussian Naive Bayes.
+- `train_gaussian_nb` at line 145
+  - Signature: `train_gaussian_nb(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, pd.Series, pd.Series]`
+  - Purpose: Train and evaluate GaussianNB on basic image features.
+- `comparison_row` at line 181
+  - Signature: `comparison_row(label: str, path: Path) -> dict[str, object] | None`
+  - Purpose: Load one comparison row from a score CSV if available.
+- `build_comparison_table` at line 201
+  - Signature: `build_comparison_table(gaussian_scores: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Build a comparison table against prior model score CSVs.
+- `main` at line 221
+  - Signature: `main() -> int`
+  - Purpose: Run Gaussian Naive Bayes training on basic image features.
 ### `src/train_logistic_regression.py`
 
 - `load_features` at line 48
@@ -213,33 +239,48 @@ This file is the agent-facing index of reusable code in this repository. The pre
   - Purpose: Train all baseline models and save scores plus confusion matrices.
 ### `src/train_random_forest.py`
 
-- `make_model` at line 49
-  - Signature: `make_model() -> RandomForestClassifier`
-  - Purpose: Create the random forest baseline model.
-- `score_set` at line 61
+- `make_basic_model` at line 63
+  - Signature: `make_basic_model() -> RandomForestClassifier`
+  - Purpose: Create the untuned random forest baseline model.
+- `score_set` at line 77
   - Signature: `score_set(y_true: pd.Series, y_pred) -> dict[str, float]`
   - Purpose: Compute core metrics for one split.
-- `evaluate_predictions` at line 74
-  - Signature: `evaluate_predictions(y_train: pd.Series, y_test: pd.Series, y_train_pred, y_test_pred, selected_seed: int, split_distance: float) -> tuple[pd.DataFrame, str, pd.DataFrame]`
+- `evaluate_predictions` at line 90
+  - Signature: `evaluate_predictions(model_name: str, y_train: pd.Series, y_test: pd.Series, y_train_pred, y_test_pred, selected_seed: int, split_distance: float, model: RandomForestClassifier, best_cv_macro_f1: float | None = None, best_params: dict[str, object] | None = None) -> tuple[pd.DataFrame, str, pd.DataFrame]`
   - Purpose: Compute train/test metrics, per-class report, and confusion matrix.
-- `save_confusion_matrix_figure` at line 132
-  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred, output_path: str | Path = CONFUSION_MATRIX_FIGURE) -> Path`
-  - Purpose: Save a confusion matrix figure for the random forest baseline.
-- `build_feature_importance_table` at line 157
+- `save_confusion_matrix_figure` at line 157
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred, output_path: str | Path, title: str) -> Path`
+  - Purpose: Save a confusion matrix figure for one random forest model.
+- `build_feature_importance_table` at line 183
   - Signature: `build_feature_importance_table(model: RandomForestClassifier) -> pd.DataFrame`
   - Purpose: Return impurity-based feature importances sorted descending.
-- `save_feature_importance_outputs` at line 171
-  - Signature: `save_feature_importance_outputs(importance: pd.DataFrame, output_csv: str | Path = FEATURE_IMPORTANCE_CSV, output_figure: str | Path = FEATURE_IMPORTANCE_FIGURE) -> tuple[Path, Path]`
+- `save_feature_importance_outputs` at line 197
+  - Signature: `save_feature_importance_outputs(importance: pd.DataFrame, output_csv: str | Path, output_figure: str | Path, title: str) -> tuple[Path, Path]`
   - Purpose: Save feature importance table and plot.
-- `train_random_forest` at line 195
-  - Signature: `train_random_forest(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, pd.DataFrame, Path, Path, pd.Series, pd.Series]`
-  - Purpose: Train and evaluate RandomForestClassifier on basic image features.
-- `comparison_row` at line 227
+- `cross_validation_folds` at line 222
+  - Signature: `cross_validation_folds(groups: pd.Series, requested_folds: int = CV_FOLDS) -> int`
+  - Purpose: Return a valid number of group-aware CV folds for the training groups.
+- `tune_random_forest` at line 230
+  - Signature: `tune_random_forest(X_train: pd.DataFrame, y_train: pd.Series, groups: pd.Series) -> GridSearchCV`
+  - Purpose: Tune RandomForestClassifier with GroupKFold on the training split only.
+- `evaluate_model` at line 249
+  - Signature: `evaluate_model(model: RandomForestClassifier, model_name: str, X_train: pd.DataFrame, X_test: pd.DataFrame, y_train: pd.Series, y_test: pd.Series, selected_seed: int, split_distance: float, matrix_figure: str | Path, importance_csv: str | Path, importance_figure: str | Path, figure_title: str, importance_title: str, best_cv_macro_f1: float | None = None, best_params: dict[str, object] | None = None) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, pd.DataFrame, Path, Path]`
+  - Purpose: Fit and evaluate one RandomForestClassifier experiment.
+- `train_random_forest` at line 294
+  - Signature: `train_random_forest(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, pd.DataFrame, Path, Path, pd.DataFrame, str, pd.DataFrame, Path, pd.DataFrame, Path, Path, pd.Series, pd.Series, GridSearchCV]`
+  - Purpose: Train and evaluate basic and tuned RandomForestClassifier experiments.
+- `comparison_row` at line 365
   - Signature: `comparison_row(label: str, path: Path) -> dict[str, object] | None`
   - Purpose: Load one comparison row from a score CSV if available.
-- `build_comparison_table` at line 247
-  - Signature: `build_comparison_table(random_forest_scores: pd.DataFrame) -> pd.DataFrame`
+- `build_comparison_table` at line 385
+  - Signature: `build_comparison_table(basic_scores: pd.DataFrame, tuned_scores: pd.DataFrame) -> pd.DataFrame`
   - Purpose: Build comparison table against prior model score CSVs.
-- `main` at line 267
+- `print_overfitting_summary` at line 412
+  - Signature: `print_overfitting_summary(scores: pd.DataFrame, label: str) -> None`
+  - Purpose: Print train-vs-test metrics for quick overfitting inspection.
+- `print_model_outputs` at line 424
+  - Signature: `print_model_outputs(scores: pd.DataFrame, report: str, matrix: pd.DataFrame, importance: pd.DataFrame, label: str) -> None`
+  - Purpose: Print metrics, per-class report, confusion matrix, and importances.
+- `main` at line 442
   - Signature: `main() -> int`
-  - Purpose: Run RandomForestClassifier training on basic image features.
+  - Purpose: Run basic and tuned RandomForestClassifier training on basic image features.
