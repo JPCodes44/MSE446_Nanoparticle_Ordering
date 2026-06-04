@@ -211,3 +211,35 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `train_and_evaluate_models` at line 89
   - Signature: `train_and_evaluate_models(features: pd.DataFrame, figures_dir: str | Path, scores_csv: str | Path, random_state: int = 446) -> pd.DataFrame`
   - Purpose: Train all baseline models and save scores plus confusion matrices.
+### `src/train_random_forest.py`
+
+- `make_model` at line 49
+  - Signature: `make_model() -> RandomForestClassifier`
+  - Purpose: Create the random forest baseline model.
+- `score_set` at line 61
+  - Signature: `score_set(y_true: pd.Series, y_pred) -> dict[str, float]`
+  - Purpose: Compute core metrics for one split.
+- `evaluate_predictions` at line 74
+  - Signature: `evaluate_predictions(y_train: pd.Series, y_test: pd.Series, y_train_pred, y_test_pred, selected_seed: int, split_distance: float) -> tuple[pd.DataFrame, str, pd.DataFrame]`
+  - Purpose: Compute train/test metrics, per-class report, and confusion matrix.
+- `save_confusion_matrix_figure` at line 132
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred, output_path: str | Path = CONFUSION_MATRIX_FIGURE) -> Path`
+  - Purpose: Save a confusion matrix figure for the random forest baseline.
+- `build_feature_importance_table` at line 157
+  - Signature: `build_feature_importance_table(model: RandomForestClassifier) -> pd.DataFrame`
+  - Purpose: Return impurity-based feature importances sorted descending.
+- `save_feature_importance_outputs` at line 171
+  - Signature: `save_feature_importance_outputs(importance: pd.DataFrame, output_csv: str | Path = FEATURE_IMPORTANCE_CSV, output_figure: str | Path = FEATURE_IMPORTANCE_FIGURE) -> tuple[Path, Path]`
+  - Purpose: Save feature importance table and plot.
+- `train_random_forest` at line 195
+  - Signature: `train_random_forest(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, pd.DataFrame, Path, Path, pd.Series, pd.Series]`
+  - Purpose: Train and evaluate RandomForestClassifier on basic image features.
+- `comparison_row` at line 227
+  - Signature: `comparison_row(label: str, path: Path) -> dict[str, object] | None`
+  - Purpose: Load one comparison row from a score CSV if available.
+- `build_comparison_table` at line 247
+  - Signature: `build_comparison_table(random_forest_scores: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Build comparison table against prior model score CSVs.
+- `main` at line 267
+  - Signature: `main() -> int`
+  - Purpose: Run RandomForestClassifier training on basic image features.
