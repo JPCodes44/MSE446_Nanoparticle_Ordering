@@ -21,6 +21,7 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── train_random_forest.py
 │   ├── train_gaussian_nb.py
 │   ├── train_knn.py
+│   ├── train_svc.py
 │   └── evaluate.py
 ├── notebooks/
 │   ├── 00_template.ipynb
@@ -31,7 +32,8 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── 05_decision_tree_basic_features.ipynb
 │   ├── 06_random_forest_basic_features.ipynb
 │   ├── 07_gaussian_nb_basic_features.ipynb
-│   └── 08_knn_basic_features.ipynb
+│   ├── 08_knn_basic_features.ipynb
+│   └── 09_svc_basic_features.ipynb
 ├── data/
 │   └── .gitkeep
 └── results/
@@ -89,6 +91,7 @@ python src/train_decision_tree.py
 python src/train_random_forest.py
 python src/train_gaussian_nb.py
 python src/train_knn.py
+python src/train_svc.py
 ```
 
 This is the first real supervised model. It uses only basic image-derived features from resized grayscale crops, then trains `LogisticRegression(class_weight="balanced", max_iter=2000)` with `StandardScaler`. Metadata is retained for labels, grouping, and auditing, but metadata columns are not used as predictors.
@@ -100,6 +103,8 @@ This is the first real supervised model. It uses only basic image-derived featur
 `train_gaussian_nb.py` trains `GaussianNB` on the same basic image feature columns and grouped split. Gaussian Naive Bayes is a probability-based baseline that assumes numeric features are conditionally independent and approximately normally distributed within each class, which is probably weak for image features. It is included as a simple course-aligned comparison model.
 
 `train_knn.py` trains a scaled `KNeighborsClassifier` baseline and then tunes only KNN with grouped cross-validation on the training split. KNN is a similarity-based model that predicts from nearby examples in scaled feature space, so `StandardScaler` is required before distance calculations.
+
+`train_svc.py` trains a scaled `SVC(kernel="rbf", class_weight="balanced")` baseline and then tunes only SVC with grouped cross-validation on the training split. SVC finds a maximum-margin decision boundary; the linear kernel tests a linear boundary, while the RBF kernel can model nonlinear boundaries in the scaled feature space.
 
 ## Run The Workflow
 
@@ -118,6 +123,7 @@ Run notebooks in order:
 5. `notebooks/06_random_forest_basic_features.ipynb`
 6. `notebooks/07_gaussian_nb_basic_features.ipynb`
 7. `notebooks/08_knn_basic_features.ipynb`
+8. `notebooks/09_svc_basic_features.ipynb`
 
 ## Outputs
 
@@ -137,13 +143,15 @@ Generated files are intentionally ignored:
 - `results/model_scores_gaussian_nb_basic.csv`
 - `results/model_scores_knn_basic.csv`
 - `results/model_scores_knn_tuned.csv`
+- `results/model_scores_svc_basic.csv`
+- `results/model_scores_svc_tuned.csv`
 - `results/feature_importance_random_forest_basic.csv`
 - `results/feature_importance_random_forest_tuned.csv`
 - `results/figures/*.png`
 
 ## Modeling Notes
 
-The current modeling milestones are `DummyClassifier(strategy="most_frequent")`, Logistic Regression on basic image features, Decision Tree on the same basic features, Random Forest on the same basic features, Gaussian Naive Bayes on the same basic features, and KNN on the same basic features. The Decision Tree, Random Forest, and KNN experiments include simple grouped hyperparameter tuning. SVC, CNNs, HOG, graph features, and augmentation are intentionally out of scope until later project steps.
+The current modeling milestones are `DummyClassifier(strategy="most_frequent")`, Logistic Regression on basic image features, Decision Tree on the same basic features, Random Forest on the same basic features, Gaussian Naive Bayes on the same basic features, KNN on the same basic features, and SVC on the same basic features. The Decision Tree, Random Forest, KNN, and SVC experiments include simple grouped hyperparameter tuning. CNNs, HOG, graph features, and augmentation are intentionally out of scope until later project steps.
 
 The split uses `sample + area` groups so repeated crops or magnifications from the same area do not leak across train and test sets. Metadata columns such as `kv`, `mm`, `mag`, `sample`, and `area` are excluded from model features.
 
