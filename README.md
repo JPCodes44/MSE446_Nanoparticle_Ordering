@@ -14,6 +14,7 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── config.py
 │   ├── parse_metadata.py
 │   ├── extract_basic_features.py
+│   ├── extract_component_features.py
 │   ├── extract_hog_features.py
 │   ├── extract_features.py
 │   ├── train_dummy_baseline.py
@@ -23,6 +24,7 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── train_gaussian_nb.py
 │   ├── train_knn.py
 │   ├── train_svc.py
+│   ├── train_svc_components.py
 │   ├── train_svc_hog.py
 │   └── evaluate.py
 ├── notebooks/
@@ -36,7 +38,8 @@ The first pass uses engineered image features only. Filename metadata is used fo
 │   ├── 07_gaussian_nb_basic_features.ipynb
 │   ├── 08_knn_basic_features.ipynb
 │   ├── 09_svc_basic_features.ipynb
-│   └── 10_svc_hog_features.ipynb
+│   ├── 10_svc_hog_features.ipynb
+│   └── 11_svc_component_features.ipynb
 ├── data/
 │   └── .gitkeep
 └── results/
@@ -97,6 +100,8 @@ python src/train_knn.py
 python src/train_svc.py
 python src/extract_hog_features.py
 python src/train_svc_hog.py
+python src/extract_component_features.py
+python src/train_svc_components.py
 ```
 
 This is the first real supervised model. It uses only basic image-derived features from resized grayscale crops, then trains `LogisticRegression(class_weight="balanced", max_iter=2000)` with `StandardScaler`. Metadata is retained for labels, grouping, and auditing, but metadata columns are not used as predictors.
@@ -112,6 +117,8 @@ This is the first real supervised model. It uses only basic image-derived featur
 `train_svc.py` trains a scaled `SVC(kernel="rbf", class_weight="balanced")` baseline and then tunes only SVC with grouped cross-validation on the training split. SVC finds a maximum-margin decision boundary; the linear kernel tests a linear boundary, while the RBF kernel can model nonlinear boundaries in the scaled feature space.
 
 `extract_hog_features.py` extracts HOG descriptors from resized grayscale crops and combines them with the existing basic image features. `train_svc_hog.py` then tunes SVC on the combined basic + HOG feature table. HOG is an engineered image feature that captures local edge direction and shape structure.
+
+`extract_component_features.py` extracts connected-component features from bright particle-like regions and combines them with the existing basic image features. `train_svc_components.py` then tunes SVC on the combined basic + component feature table. Connected-component features approximate particle/blob and aggregate structure.
 
 ## Run The Workflow
 
@@ -132,6 +139,7 @@ Run notebooks in order:
 7. `notebooks/08_knn_basic_features.ipynb`
 8. `notebooks/09_svc_basic_features.ipynb`
 9. `notebooks/10_svc_hog_features.ipynb`
+10. `notebooks/11_svc_component_features.ipynb`
 
 ## Outputs
 
@@ -142,6 +150,8 @@ Generated files are intentionally ignored:
 - `data/features_basic.csv`
 - `data/features_hog.csv`
 - `data/features_basic_hog.csv`
+- `data/features_components.csv`
+- `data/features_basic_components.csv`
 - `results/dataset_summary.csv`
 - `results/parameter_group_counts.csv`
 - `results/model_scores_dummy.csv`
@@ -157,13 +167,15 @@ Generated files are intentionally ignored:
 - `results/model_scores_svc_tuned.csv`
 - `results/model_scores_svc_basic_hog.csv`
 - `results/svc_basic_hog_best_params.json`
+- `results/model_scores_svc_basic_components.csv`
+- `results/svc_basic_components_best_params.json`
 - `results/feature_importance_random_forest_basic.csv`
 - `results/feature_importance_random_forest_tuned.csv`
 - `results/figures/*.png`
 
 ## Modeling Notes
 
-The current modeling milestones are `DummyClassifier(strategy="most_frequent")`, Logistic Regression on basic image features, Decision Tree on the same basic features, Random Forest on the same basic features, Gaussian Naive Bayes on the same basic features, KNN on the same basic features, SVC on the same basic features, and tuned SVC on combined basic + HOG features. The Decision Tree, Random Forest, KNN, and SVC experiments include simple grouped hyperparameter tuning. CNNs, graph features, and augmentation are intentionally out of scope until later project steps.
+The current modeling milestones are `DummyClassifier(strategy="most_frequent")`, Logistic Regression on basic image features, Decision Tree on the same basic features, Random Forest on the same basic features, Gaussian Naive Bayes on the same basic features, KNN on the same basic features, SVC on the same basic features, tuned SVC on combined basic + HOG features, and tuned SVC on combined basic + connected-component features. The Decision Tree, Random Forest, KNN, and SVC experiments include simple grouped hyperparameter tuning. CNNs, graph features, and augmentation are intentionally out of scope until later project steps.
 
 The split uses `sample + area` groups so repeated crops or magnifications from the same area do not leak across train and test sets. Metadata columns such as `kv`, `mm`, `mag`, `sample`, and `area` are excluded from model features.
 

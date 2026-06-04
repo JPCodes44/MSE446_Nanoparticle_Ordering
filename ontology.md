@@ -52,6 +52,38 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `main` at line 134
   - Signature: `main() -> int`
   - Purpose: Extract and save basic image-derived features.
+### `src/extract_component_features.py`
+
+- `bright_particle_mask` at line 65
+  - Signature: `bright_particle_mask(image: np.ndarray) -> np.ndarray`
+  - Purpose: Threshold bright particle-like regions and remove tiny objects.
+- `zero_component_features` at line 80
+  - Signature: `zero_component_features(image_area: int, bright_pixel_ratio: float) -> dict[str, float]`
+  - Purpose: Return finite component features for images with no labeled components.
+- `extract_component_image_features` at line 104
+  - Signature: `extract_component_image_features(image: np.ndarray) -> dict[str, float]`
+  - Purpose: Compute connected-component area and shape features for one image.
+- `extract_component_features_for_metadata` at line 146
+  - Signature: `extract_component_features_for_metadata(metadata: pd.DataFrame, sample_n: int | None = SAMPLE_N) -> pd.DataFrame`
+  - Purpose: Extract component features for metadata rows while retaining tracking columns.
+- `load_or_build_component_features` at line 172
+  - Signature: `load_or_build_component_features(metadata: pd.DataFrame, output_csv: str | Path = COMPONENT_FEATURES_CSV, force_rebuild: bool = FORCE_REBUILD, sample_n: int | None = SAMPLE_N) -> pd.DataFrame`
+  - Purpose: Load cached component features or extract and save them.
+- `component_feature_columns` at line 192
+  - Signature: `component_feature_columns(features: pd.DataFrame) -> list[str]`
+  - Purpose: Return component feature columns from a feature table.
+- `zero_component_count` at line 205
+  - Signature: `zero_component_count(features: pd.DataFrame) -> int`
+  - Purpose: Return how many images have zero detected components.
+- `combine_basic_and_component_features` at line 211
+  - Signature: `combine_basic_and_component_features(basic: pd.DataFrame, component_features: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Combine basic image features with component features without duplicating metadata.
+- `save_combined_features` at line 230
+  - Signature: `save_combined_features(features: pd.DataFrame, output_csv: str | Path = COMBINED_FEATURES_CSV) -> Path`
+  - Purpose: Save combined basic + component features to CSV.
+- `main` at line 241
+  - Signature: `main() -> int`
+  - Purpose: Extract component features, combine with basic features, and save both tables.
 ### `src/extract_features.py`
 
 - `load_grayscale_image` at line 19
@@ -404,6 +436,53 @@ This file is the agent-facing index of reusable code in this repository. The pre
 - `main` at line 397
   - Signature: `main() -> int`
   - Purpose: Run basic and tuned SVC training on basic image features.
+### `src/train_svc_components.py`
+
+- `load_combined_features` at line 78
+  - Signature: `load_combined_features(path: str | Path = COMBINED_FEATURES_CSV) -> pd.DataFrame`
+  - Purpose: Load combined basic + component features for SVC training.
+- `feature_columns` at line 97
+  - Signature: `feature_columns(features: pd.DataFrame) -> list[str]`
+  - Purpose: Return basic image feature columns plus connected-component columns.
+- `make_model` at line 102
+  - Signature: `make_model()`
+  - Purpose: Create the scaled SVC pipeline for basic + component features.
+- `score_set` at line 107
+  - Signature: `score_set(y_true: pd.Series, y_pred: np.ndarray) -> dict[str, float]`
+  - Purpose: Compute core metrics for one split.
+- `svc_params` at line 120
+  - Signature: `svc_params(model) -> dict[str, object]`
+  - Purpose: Return SVC hyperparameters from a fitted pipeline.
+- `evaluate_predictions` at line 131
+  - Signature: `evaluate_predictions(y_train: pd.Series, y_test: pd.Series, y_train_pred: np.ndarray, y_test_pred: np.ndarray, selected_seed: int, split_distance: float, model, best_cv_macro_f1: float, best_params: dict[str, object], n_features: int, n_component_features: int, zero_component_images: int) -> tuple[pd.DataFrame, str, pd.DataFrame]`
+  - Purpose: Compute train/test metrics, per-class report, and confusion matrix.
+- `save_confusion_matrix_figure` at line 202
+  - Signature: `save_confusion_matrix_figure(y_test: pd.Series, y_test_pred: np.ndarray, output_path: str | Path = CONFUSION_MATRIX_FIGURE) -> Path`
+  - Purpose: Save confusion matrix figure for tuned SVC with basic + component features.
+- `cross_validation_folds` at line 227
+  - Signature: `cross_validation_folds(groups: pd.Series, requested_folds: int = CV_FOLDS) -> int`
+  - Purpose: Return a valid number of group-aware CV folds for the training groups.
+- `tune_svc_components` at line 235
+  - Signature: `tune_svc_components(X_train: pd.DataFrame, y_train: pd.Series, groups: pd.Series, use_small_grid: bool = USE_SMALL_GRID) -> GridSearchCV`
+  - Purpose: Tune a scaled SVC on the training split only.
+- `save_best_params` at line 255
+  - Signature: `save_best_params(search: GridSearchCV, output_path: str | Path = BEST_PARAMS_JSON) -> Path`
+  - Purpose: Save best parameters and CV score as JSON.
+- `train_svc_components` at line 267
+  - Signature: `train_svc_components(features: pd.DataFrame) -> tuple[pd.DataFrame, str, pd.DataFrame, Path, Path, pd.Series, pd.Series, GridSearchCV]`
+  - Purpose: Train and evaluate tuned SVC on combined basic + component features.
+- `comparison_row` at line 313
+  - Signature: `comparison_row(label: str, path: Path) -> dict[str, object] | None`
+  - Purpose: Load one comparison row from a score CSV if available.
+- `build_comparison_table` at line 333
+  - Signature: `build_comparison_table(component_scores: pd.DataFrame) -> pd.DataFrame`
+  - Purpose: Build a comparison table against prior model score CSVs.
+- `print_previous_svc_comparison` at line 353
+  - Signature: `print_previous_svc_comparison(scores: pd.DataFrame) -> None`
+  - Purpose: Print headline comparison against the prior tuned SVC if available.
+- `main` at line 371
+  - Signature: `main() -> int`
+  - Purpose: Run tuned SVC training on combined basic + component features.
 ### `src/train_svc_hog.py`
 
 - `load_combined_features` at line 73

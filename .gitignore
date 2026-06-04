@@ -14,6 +14,8 @@ data/features.csv
 data/features_basic.csv
 data/features_hog.csv
 data/features_basic_hog.csv
+data/features_components.csv
+data/features_basic_components.csv
 data/dataset_metadata.csv
 results/*.csv
 results/*.json
