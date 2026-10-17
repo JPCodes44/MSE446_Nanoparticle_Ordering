@@ -4,6 +4,34 @@ Classical machine learning workflow for classifying cropped SEM micrographs of p
 
 The first pass uses engineered image features only. Filename metadata is used for parsing labels, auditing the dataset, and group-aware train/test splitting, but not as model input.
 
+## How SEM Images Become Predictions
+
+The diagram starts with **actual SEM crops from the local dataset**, labeled `ordered` and `disordered` in their filenames. In the ordered example, many bright particles follow aligned tracks; in the disordered example, the particles appear more scattered. These are illustrative examples of the existing labels, not model predictions.
+
+![Two real SEM crops, ordered and disordered, feed image feature extraction. Sample-area groups are split into training and test sets. Classifiers learn from training features and labels, then predict held-out labels for evaluation.](docs/images/sem-training-workflow.png)
+
+The model learns a relationship between **numeric measurements of each image (`X`)** and its **known ordering label (`y`)**:
+
+1. **Measure the image.** Basic features summarize grayscale intensity, entropy, bright-pixel fraction, and edge density. Separate SVC experiments add either HOG descriptors for local edge directions or connected-component measurements for bright-region size and shape.
+2. **Learn from labeled training examples.** Each crop becomes one feature row paired with `ordered` or `disordered`. The classifier fits a decision rule to these rows. Scaling, where needed, is fitted within the training pipeline; hyperparameter tuning uses grouped cross-validation on the training split only.
+3. **Check unseen groups.** All crops sharing `sample + area` stay together when splitting. The fitted model predicts labels for held-out groups, and predictions are compared with known labels using balanced accuracy, macro F1, and confusion matrices. Voltage, working distance, magnification, sample, and area are not predictors.
+
+The majority-class dummy baseline is a separate reference: it ignores image features entirely.
+
+<details>
+<summary>SEM example sources and editable diagram</summary>
+
+Both examples are labeled `100k` magnification. The PNG previews are resized exports of the full crops; their displayed size does not establish a physical scale. Raw TIFF data remains local and ignored by Git; only these small documentation previews are included.
+
+| Dataset label | Preview | Original local filename |
+| --- | --- | --- |
+| Ordered | [SEM crop](docs/images/sem-ordered.png) | `kv-10p0kV__mm-11p3mm__label-ordered__sample-S1__area-no_area__mag-100k__id-100__orig-100-S1-no_area-100k-ordered.tif` |
+| Disordered | [SEM crop](docs/images/sem-disordered.png) | `kv-10p0kV__mm-6p4mm__label-disordered__sample-S5__area-A56__mag-100k__id-33__orig-33-S5-A56-100k-disordered.tif` |
+
+[Editable SVG diagram](docs/images/sem-training-workflow.svg) (includes the SEM previews).
+
+</details>
+
 ## Project Structure
 
 ```text
